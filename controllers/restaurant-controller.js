@@ -105,7 +105,10 @@ const restaurantController = {
   },
   getTopRestaurants: (req, res, next) => {
     return Restaurant.findAll({
-      include: [{ model: User, as: 'FavoritedUsers' }]
+      include: [
+        { model: User, as: 'FavoritedUsers' },
+        { model: User, as: 'LikedUsers' }
+      ]
     })
       .then(restaurants => {
         if (!restaurants) throw new Error("Restaurant didn't exist!")
@@ -115,7 +118,8 @@ const restaurantController = {
             favoritedCount: r.FavoritedUsers.length,
             isFavorited:
               req.user &&
-              req.user.FavoritedRestaurants.some(fr => fr.id === r.id)
+              req.user.FavoritedRestaurants.some(fr => fr.id === r.id),
+            isLiked: req.user && req.user.LikedRestaurants.some(lr => lr.id === r.id)
           }))
           .sort((a, b) => b.favoritedCount - a.favoritedCount)
           .slice(0, 10)
